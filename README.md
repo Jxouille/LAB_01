@@ -15,10 +15,23 @@ Charles Rauseo : exercise 3 and exercise 6
 
 ### Exercise 2: Balanced Symbol Checker
 
-* **Description** : This fonction take a text in input and return if the symbol is well placed and well close. For this we parse all the text and we create an index of symbol open associate with her close symbole and for each open character we add it to a list and when we have a close symbol we look if it was the close symbol of the last open symbol in the list if not we return False and if and the end the list is not empty we return False too because it's signifie that open symbol has no close symbole, if at the end the list is empty we return True
+* **Description** : This function takes a string as input and returns whether all symbols are properly balanced and closed. It parses the entire text, mapping each opening symbol to its corresponding closing symbol. For each opening character encountered, it pushes it onto a stack. When a closing symbol is found, it checks whether it matches the most recent opening symbol from the stack; if not, it returns False. At the end, if the stack is not empty, it returns False (meaning an opening symbol was never closed). Otherwise, it returns True
 
 ### Exercise 4: Polynomial Evaluation (Horner's Method)
 * **Description** : This function evaluates a polynomial for a given real value $x$ using an array of coefficients. Rather than using the naive approach (which calculates each power of $x$ separately), it implements **Horner's method** to optimize computation and minimize the number of operations.
+
+### Exercise 5 : Array Rotation
+
+* **Description** : This module provides three distinct algorithmic approaches to rotate an array
+to the right by k positions in-place, illustrating different time and space complexity tradeoffs:
+
+- rotate_temp_array: Uses an auxiliary buffer to achieve O(n) time with O(n) extra space.
+- rotate_one_by_one: Shifts elements step-by-step using O(1) auxiliary space, running in O(n * k) time.
+- rotate_reverse: Optimally performs the rotation in O(n) time and O(1) space via a three-step reversal algorithm.
+
+All implementations handle edge cases (empty or single-element lists) and normalize k using modular arithmetic.
+
+
 
 ---
 
@@ -34,3 +47,17 @@ Charles Rauseo : exercise 3 and exercise 6
 ### Exercise 4 
 * **Time Complexity** : $O(n)$ where $n$ is the degree of the polynomial (or the size of the coefficient array minus one). The algorithm performs exactly $n$ multiplications and additions in a single linear loop, which is much more efficient than the naive $O(n^2)$ approach.
 * **Space Complexity** : $O(1)$ because the calculation is performed in constant memory without any extra data structures.
+
+### Exercise 5
+
+#### temporary array method 
+* **Time Complexity** :  O(n) 
+* **Space Complexity** : O(n) 
+
+#### rotate one by one method
+* **Time Complexity** :  O(n x (k(mod n))) 
+* **Space Complexity** : O(1)
+
+#### reverse segment method
+* **Time Complexity** :  O(n) 
+* **Space Complexity** : O(1)
