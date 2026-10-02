@@ -1,0 +1,105 @@
+ALGORITHM CosineSimilarity(matrix, user_A, user_B, U, I)
+INPUT: 
+    matrix: 2D Integer Array [0..U-1][0..I-1]
+    user_A, user_B : User IDs
+    U = Total Users
+    I = Total Interests
+OUTPUT: 
+    similarity: Float
+
+BEGIN
+    dot_product = 0.0; // Initialized at 0 
+    sum_sq_A = 0.0;
+    sum_sq_B = 0.0;
+
+    FOR j FROM 0 TO I - 1 DO
+        val_A = matrix[user_A][j] // Get value between O to 10
+        val_B = matrix[user_B][j]
+
+	  // Sum A_i * B_i
+        dot_product = dot_product + (val_A * val_B)         sum_sq_A = sum_sq_A + (val_A * val_A)
+        sum_sq_B = sum_sq_B + (val_B * val_B)
+    END FOR
+
+    norm_A = SQRT(sum_sq_A) // Calculate norm_A and norm_B
+    norm_B = SQRT(sum_sq_B)
+
+    IF norm_A == 0 OR norm_B == 0 THEN // To avoid division by 0
+        RETURN 0.0
+    END IF
+
+    RETURN dot_product / (norm_A * norm_B) // Return the cosine similarity 
+END
+
+ALGORITHM GetTopKRecommendations(matrix, is_friend, target_user, K, U, I)
+INPUT:
+    matrix: 2D Integer Array [0..U-1][0..I-1]
+    is_friend: 2D Boolean Array [0..U-1][0..U-1]
+    target_user: Integer
+    K: Integer (Number of recommendations requested)
+    U, I: Integers
+OUTPUT:
+    top_candidates: Array of User IDs (size K)
+
+BEGIN
+    CREATE array similarities OF SIZE U // Store similarity scores for all users
+
+    // Step 1: Compute similarity scores with all potential users
+    FOR other_user FROM 0 TO U - 1 DO
+        IF other_user == target_user OR is_friend[target_user][other_user] == TRUE THEN
+            similarities[other_user] = -1.0  // Ignore self and current friends
+        ELSE
+            similarities[other_user] = CosineSimilarity(matrix, target_user, other_user, U, I) // Calculate similarity
+        END IF
+    END FOR
+
+    // Step 2: Extract top K users with highest similarity scores
+    CREATE array top_candidates OF SIZE K // Result array for recommended user IDs
+
+    FOR rank FROM 0 TO K - 1 DO
+        max_idx = -1
+        max_score = -1.0
+
+        FOR u FROM 0 TO U - 1 DO
+            IF similarities[u] > max_score THEN
+                max_score = similarities[u] // Update max score
+                max_idx = u                 // Update best user index
+            END IF
+        END FOR
+
+        IF max_idx != -1 AND max_score > 0.0 THEN
+            top_candidates[rank] = max_idx // Add best user to results
+            similarities[max_idx] = -1.0   // Mark as chosen so not picked again
+        ELSE
+            top_candidates[rank] = -1      // Fill with -1 if no candidate left
+        END IF
+    END FOR
+
+    RETURN top_candidates // Return array of top K users
+END
+
+ALGORITHM RecommendInterests(matrix, target_user, most_similar_user, rating_threshold, U, I)
+INPUT:
+    matrix: 2D Integer Array [0..U-1][0..I-1]
+    target_user: Integer
+    most_similar_user: Integer
+    rating_threshold: Integer (e.g., 6)
+    U, I: Integers
+OUTPUT:
+    recommended_interests: Dynamic List of Interest Column Indices
+
+
+BEGIN
+    CREATE empty list recommended_interests // Initialized as empty list
+
+    FOR j FROM 0 TO I - 1 DO
+        val_target = matrix[target_user][j] // Get rating for interest j (0 to 10)
+        val_similar = matrix[most_similar_user][j]
+
+        IF val_target <= 2 AND val_similar >= rating_threshold THEN // If target low & similar high
+            APPEND j TO recommended_interests // Add interest index
+        END IF
+    END FOR
+
+    RETURN recommended_interests 
+END
