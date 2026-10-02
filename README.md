@@ -1,9 +1,20 @@
+### Repartion of exercise 
+- exercice 1 : Axel Steinhart
+- exercise 2 : Maeva Roncey
+- exercice 3 : Charles Rauseo
+
+### Exercise 1: Friend Request Timeline
+* **Descritpion**: This exercise involves specific characteristics used to determine whether a message is calm, aggressive, urgent, and/or spam, based on a given set of rules.
+
+
 ### Exercise 3: Friend Recommendation System
 * **Description**: This module implements a collaborative filtering friend recommendation system based on user interest profiles. It computes the cosine similarity between users' interest vectors, extracts top-K friend recommendations by excluding existing friends and self-matches, and suggests new high-rated interests from the most similar users.
 
 ---
 
 ## Complexity Analysis Summary
+
+### Exercice 1
 
 ### Exercise 3
 

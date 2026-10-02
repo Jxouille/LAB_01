@@ -1,14 +1,16 @@
 def friend_request_timeline(message):
     message_type = ""
     nombre_maj = 0
+    nombre_char = 0
     for char in message:
         if char.isupper():
             nombre_maj += 1
+        if char.isalpha():
+            nombre_char += 1
     urgency = 0
     for char in message:
         if char in ['!', '?']:
             urgency += 1
-    nombre_char = len(message)
     caps_ratio = nombre_maj / nombre_char if nombre_char > 0 else 0
     if caps_ratio < 0.3 and urgency < 3:
         message_type = "CALM"
