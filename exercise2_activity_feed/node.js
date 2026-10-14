@@ -4,17 +4,17 @@
 
 class Node {
     constructor(data) {
-        this.data = data;   // Stores the activity object
-        this.next = null;   // Pointer to the next node underneath in the stack
+        this.data = data;   
+        this.next = null;   
     }
 }
 
 class QueueNode {
     constructor(data) {
-        this.data = data;   // Stores the notification message/object
-        this.next = null;   // Pointer to the next notification in line
+        this.data = data;   
+        this.next = null;  
     }
 }
 
-// Export classes so they can be imported in other files
+
 module.exports = { Node, QueueNode };
