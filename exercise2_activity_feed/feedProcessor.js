@@ -1,6 +1,6 @@
-// ==========================================
-// feedProcessor.js - Part C: Integrated Processor
-// ==========================================
+
+// Part C: Integrated Processor
+
 const ActivityStack = require('./activityStack');
 const NotificationQueue = require('./notificationQueue');
 

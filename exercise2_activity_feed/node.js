@@ -1,6 +1,6 @@
-// ==========================================
-// node.js - Shared Node classes
-// ==========================================
+
+// Shared Node classes
+
 
 class Node {
     constructor(data) {

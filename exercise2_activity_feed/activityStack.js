@@ -1,12 +1,12 @@
-// ==========================================
-// activityStack.js - Part A: Stack Structure
-// ==========================================
+
+//Part A: Stack Structure
+
 const { Node } = require('./node');
 
 class ActivityStack {
     constructor() {
-        this.top = null;    // Points to the most recent activity at the top of the stack
-        this._size = 0;     // Keeps track of how many items are in the stack
+        this.top = null;    
+        this._size = 0;     
     }
 
     is_empty() {

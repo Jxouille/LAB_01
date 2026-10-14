@@ -1,6 +1,5 @@
-// ==========================================
-// main.js - Application Entry Point
-// ==========================================
+
+// Main and tests
 const FeedProcessor = require('./feedProcessor');
 
 // Initialize the integrated feed system

@@ -1,13 +1,13 @@
-// ==========================================
-// notificationQueue.js - Part B: Queue Structure
-// ==========================================
+
+//  Part B: Queue Structure
+
 const { QueueNode } = require('./node');
 
 class NotificationQueue {
     constructor() {
-        this.front = null;  // Points to the oldest notification (next to be processed)
-        this.rear = null;   // Points to the newest standard notification at the back
-        this._size = 0;     // Keeps track of the total number of notifications
+        this.front = null;  
+        this.rear = null;   
+        this._size = 0;    
     }
 
     is_empty() {
