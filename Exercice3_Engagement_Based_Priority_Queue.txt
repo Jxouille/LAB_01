@@ -1,0 +1,176 @@
+ALGORITHM EnqueuePost(queue, new_post)
+INPUT:
+    queue: Reference to TrendingPriorityQueue
+    new_post: Post object
+OUTPUT:
+    None (Modifies the queue structure in place)
+
+BEGIN
+    CREATE new_node WITH post = new_post, next = NULL
+
+    IF queue.head == NULL OR new_post.engagement_score > queue.head.post.engagement_score THEN
+        new_node.next = queue.head
+        queue.head = new_node
+    ELSE
+        current = queue.head
+        WHILE current.next != NULL AND current.next.post.engagement_score >= new_post.engagement_score DO
+            current = current.next // Traverse to find correct sorted position
+        END WHILE
+        new_node.next = current.next
+        current.next = new_node
+    END IF
+
+    queue.size = queue.size + 1
+END
+
+
+ALGORITHM DequeueMaxPost(queue)
+INPUT:
+    queue: Reference to TrendingPriorityQueue
+OUTPUT:
+    top_post: Post object or NULL
+
+BEGIN
+    IF queue.head == NULL THEN
+        RETURN NULL // Queue is empty
+    END IF
+
+    top_post = queue.head.post
+    queue.head = queue.head.next // Move head to the next node
+    queue.size = queue.size - 1
+
+    RETURN top_post
+END
+
+
+ALGORITHM UpdateScore(queue, post_id, new_likes, new_comments, new_shares)
+INPUT:
+    queue: Reference to TrendingPriorityQueue
+    post_id: String
+    new_likes, new_comments, new_shares: Integers
+OUTPUT:
+    None
+
+BEGIN
+    CREATE dummy_node WITH post = NULL, next = queue.head
+    prev = dummy_node
+    current = queue.head
+    target_post = NULL
+
+    // Step 1: Find and remove the target post from the list
+    WHILE current != NULL DO
+        IF current.post.post_id == post_id THEN
+            target_post = current.post
+            prev.next = current.next // Unlink node
+            queue.size = queue.size - 1
+            BREAK
+        END IF
+        prev = current
+        current = current.next
+    END WHILE
+
+    queue.head = dummy_node.next
+
+    // Step 2: Recalculate score and re-enqueue in correct sorted position
+    IF target_post != NULL THEN
+        target_post.likes = new_likes
+        target_post.comments = new_comments
+        target_post.shares = new_shares
+        target_post.engagement_score = (target_post.likes * 1.0) + (target_post.comments * 2.0) + (target_post.shares * 3.0)
+        
+        EnqueuePost(queue, target_post)
+    END IF
+END
+
+
+ALGORITHM RefreshAll(queue)
+INPUT:
+    queue: Reference to TrendingPriorityQueue
+OUTPUT:
+    None
+
+BEGIN
+    IF queue.head == NULL OR queue.head.next == NULL THEN
+        RETURN // Nothing or only 1 item to refresh
+    END IF
+
+    CREATE empty list all_posts
+    current = queue.head
+
+    // Step 1: Recalculate scores and collect all posts
+    WHILE current != NULL DO
+        current.post.engagement_score = (current.post.likes * 1.0) + (current.post.comments * 2.0) + (current.post.shares * 3.0)
+        APPEND current.post TO all_posts
+        current = current.next
+    END WHILE
+
+    // Step 2: Reset queue and re-insert all posts
+    queue.head = NULL
+    queue.size = 0
+
+    FOR EACH p IN all_posts DO
+        EnqueuePost(queue, p)
+    END FOR
+END
+
+
+ALGORITHM DecayOlderThan(queue, threshold_timestamp, decay_factor)
+INPUT:
+    queue: Reference to TrendingPriorityQueue
+    threshold_timestamp: Long
+    decay_factor: Float (e.g., 0.20 for 20% reduction)
+OUTPUT:
+    None
+
+BEGIN
+    current = queue.head
+
+    // Step 1: Apply decay reduction to metrics of older posts
+    WHILE current != NULL DO
+        IF current.post.timestamp < threshold_timestamp THEN
+            current.post.likes = current.post.likes * (1.0 - decay_factor)
+            current.post.comments = current.post.comments * (1.0 - decay_factor)
+            current.post.shares = current.post.shares * (1.0 - decay_factor)
+            current.post.engagement_score = (current.post.likes * 1.0) + (current.post.comments * 2.0) + (current.post.shares * 3.0)
+        END IF
+        current = current.next
+    END WHILE
+
+    // Step 2: Re-sort the entire queue after score updates
+    RefreshAll(queue)
+END
+
+
+ALGORITHM DualEnqueue(dual_queue, post)
+INPUT:
+    dual_queue: Reference to DualPriorityQueue
+    post: Post object
+OUTPUT:
+    None
+
+BEGIN
+    IF post.engagement_score > 100 THEN
+        EnqueuePost(dual_queue.viralQueue, post)
+    ELSE
+        EnqueuePost(dual_queue.normalQueue, post)
+    END IF
+END
+
+
+ALGORITHM DualDequeue(dual_queue)
+INPUT:
+    dual_queue: Reference to DualPriorityQueue
+OUTPUT:
+    Post object
+
+BEGIN
+    pick_viral = RANDOM_NUMBER_BETWEEN(0.0, 1.0) < 0.7 // 70% chance for viral queue
+
+    IF pick_viral AND NOT dual_queue.viralQueue.isEmpty() THEN
+        RETURN DequeueMaxPost(dual_queue.viralQueue)
+    ELSE IF NOT dual_queue.normalQueue.isEmpty() THEN
+        RETURN DequeueMaxPost(dual_queue.normalQueue)
+    ELSE
+        RETURN DequeueMaxPost(dual_queue.viralQueue) // Fallback if normal is empty
+    END IF
+END
