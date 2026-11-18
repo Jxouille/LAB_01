@@ -1,5 +1,5 @@
 ### Repartion of exercise 
 
-- exercice 1 : Maeva Roncey
-- exercice 2 : Axel Steinhart 
+- exercice 1 : Axel Steinhart
+- exercice 2 : Maéva Roncey
 - exercice 3 : Charles Rauseo
