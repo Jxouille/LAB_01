@@ -47,3 +47,39 @@
 2. **Pre-order or post-order for aggregation:** use post-order when the value of a parent depends on its children (subtree totals, heights). Use pre-order when information flows from the parent down to the children (depth, path, inherited labels).
 3. **Iterative versions:** pre-order pops a node and then pushes its right child before its left child. In-order pushes left children until reaching an empty subtree, pops a node, visits it, then moves to its right child. Post-order uses a "last visited" pointer, so a node is processed only after its right subtree.
 4. **Category export:** pre-order is the best choice, because every parent is written before its children. The export can then be read back in one pass.
+
+### Exercise 3: Generalized Trees (N-ary Trees) and Representations
+
+- **Description**: This module implements a generalized (N-ary) tree, where a category can have any number of subcategories. Each `GeneralizedCategoryNode` stores `category_id`, `name`, `post_count`, a `children` list and `parent`. The module covers:
+  - Conversions: binary → generalized (left and right both become children), generalized → binary with the "first child, next sibling" (FCNS) representation, and the inverse FCNS → generalized.
+  - Traversals: pre-order, post-order, level-order (BFS with a queue) and fan-out.
+  - Metrics: height, number of nodes, number of leaves, branching factor.
+
+---
+
+## Complexity Analysis
+
+**Core Algorithms Summary:**
+- **BinaryToGeneralized**: Copies each node and adds its left and right children (if any) to the `children` list, setting `parent` ($O(n)$).
+- **GeneralizedToBinary**: `left` ← first child, then the other children are chained through `right` with a loop; `parent` pointers are set ($O(n)$).
+- **FCNSToGeneralized**: Inverse of the previous one: walks the `left` → `right` → `right`… chain to rebuild each `children` list ($O(n)$).
+- **PreOrderGeneralized / PostOrderGeneralized**: Recursive DFS writing into a single shared result list, so no list is copied ($O(n)$).
+- **LevelOrderGeneralized**: BFS with a queue, enqueuing all children of each dequeued node ($O(n)$).
+- **CalculateFanOut**: Maximum `children.Size()` over all nodes ($O(n)$).
+- **CalculateHeightGeneralized**: `1 + max(height(child))`, a leaf has height 0 and an empty tree $-1$ ($O(n)$).
+- **CountNodesGeneralized / CountLeavesGeneralized**: A single recursive traversal ($O(n)$).
+- **CalculateBranchingFactor**: `GetNonLeavesCount` returns the number of non-leaf nodes and the total number of children in one pass; the result is their real division ($O(n)$).
+
+**Complexity:**
+- **Time Complexity:** $O(n)$ for every function, since each node is visited once and each child reference ($n - 1$ in total) is followed once.
+- **Space Complexity:** $O(n)$ for the nodes, plus an $O(h)$ recursion stack, or $O(w)$ queue space for level-order ($w$ = maximum width).
+
+**Note on the example of the subject:** the subject gives a branching factor of $(3 + 2 + 2 + 3) / 4 = 2.5$, but Python also has 2 children (Django, Flask). With 5 non-leaf nodes the correct value is $12 / 5 = 2.4$, which is what our function returns. Other results on the example tree: fan-out 3, 13 nodes, 8 leaves, height 3.
+
+**Questions:**
+1. **Advantages and disadvantages:** the generalized tree matches the real hierarchy and gives direct access to all subcategories, but each node holds a variable-size list. The FCNS binary tree has a fixed size per node (2 pointers), but reaching the k-th child means walking the sibling chain, and the structure is less intuitive to read.
+2. **Space complexity:** both are $O(n)$. With dynamic lists, the total number of child references is exactly $n - 1$. It becomes $O(n \cdot b)$ only if each node reserves a fixed array of $b$ slots. FCNS uses exactly $2n$ pointers.
+3. **Traversal complexity:** $O(n)$ time in both representations. In the N-ary tree the recursion depth is the real height $h$. In FCNS, going to a sibling is also a recursive step, so the depth can reach $O(n)$ (a root with 1000 children: depth 1 in N-ary, 1000 in FCNS).
+4. **Choice for millions of categories:** the generalized representation for the application logic (direct access to subcategories, stack depth = real height), with iterative traversals to avoid stack overflow and a hash map `id → node` for $O(1)$ lookup. FCNS remains useful for storage, because every record has a fixed size.
+5. **FCNS transformation:** `left` points to the first child and `right` to the next sibling, so the children of a node form a linked list. Each node is created once and each child is read once: $O(n)$ time, $O(n)$ space for the new tree. `FCNSToGeneralized(GeneralizedToBinary(T))` gives back `T`.
+
