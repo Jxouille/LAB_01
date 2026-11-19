@@ -1,0 +1,169 @@
+Class GeneralizedCategoryNode
+    category_id
+    name
+    post_count
+    children <- New List()
+    parent <- null
+
+    Constructor(id, name, posts)
+        this.category_id <- id
+        this.name <- name
+        this.post_count <- posts
+    End Constructor
+End Class
+
+Class GeneralizedTreeConverter
+    Function BinaryToGeneralized(binary_root)
+        If binary_root is null Then Return null
+        gen_node <- New GeneralizedCategoryNode(binary_root.category_id, binary_root.name, binary_root.post_count)
+
+        If binary_root.left is not null Then
+            child_gen <- BinaryToGeneralized(binary_root.left)
+            child_gen.parent <- gen_node
+            gen_node.children.Add(child_gen)
+        End If
+        If binary_root.right is not null Then
+            child_gen <- BinaryToGeneralized(binary_root.right)
+            child_gen.parent <- gen_node
+            gen_node.children.Add(child_gen)
+        End If
+        Return gen_node
+    End Function
+
+    Function GeneralizedToBinary(gen_root)
+        If gen_root is null Then Return null
+        bin_root <- New CategoryNode(gen_root.category_id, gen_root.name, gen_root.post_count)
+
+        If not gen_root.children.IsEmpty() Then
+            bin_root.left <- GeneralizedToBinary(gen_root.children[0])
+            bin_root.left.parent <- bin_root
+
+            curr_sibling <- bin_root.left
+            For i <- 1 To gen_root.children.Size() - 1 Do
+                curr_sibling.right <- GeneralizedToBinary(gen_root.children[i])
+                curr_sibling.right.parent <- curr_sibling
+                curr_sibling <- curr_sibling.right
+            End For
+        End If
+        Return bin_root
+    End Function
+
+    Function FCNSToGeneralized(bin_node)
+        If bin_node is null Then Return null
+        gen_node <- New GeneralizedCategoryNode(bin_node.category_id, bin_node.name, bin_node.post_count)
+        child <- bin_node.left
+        While child is not null Do
+            child_gen <- FCNSToGeneralized(child)
+            child_gen.parent <- gen_node
+            gen_node.children.Add(child_gen)
+            child <- child.right
+        End While
+        Return gen_node
+    End Function
+
+    Function PreOrderGeneralized(gen_node)
+        result <- New List()
+        PreOrderHelper(gen_node, result)
+        Return result
+    End Function
+
+    Function PreOrderHelper(gen_node, result)
+        If gen_node is null Then Return
+        result.Add(gen_node.name)
+        For Each child in gen_node.children Do
+            PreOrderHelper(child, result)
+        End For
+    End Function
+
+    Function PostOrderGeneralized(gen_node)
+        result <- New List()
+        PostOrderHelper(gen_node, result)
+        Return result
+    End Function
+
+    Function PostOrderHelper(gen_node, result)
+        If gen_node is null Then Return
+        For Each child in gen_node.children Do
+            PostOrderHelper(child, result)
+        End For
+        result.Add(gen_node.name)
+    End Function
+
+    Function LevelOrderGeneralized(gen_root)
+        result <- New List()
+        If gen_root is null Then Return result
+        queue <- New Queue()
+        queue.Enqueue(gen_root)
+
+        While not queue.IsEmpty() Do
+            curr <- queue.Dequeue()
+            result.Add(curr.name)
+            For Each child in curr.children Do
+                queue.Enqueue(child)
+            End For
+        End While
+        Return result
+    End Function
+
+    Function CalculateFanOut(gen_node)
+        If gen_node is null Then Return 0
+        max_fan_out <- gen_node.children.Size()
+        For Each child in gen_node.children Do
+            child_fan <- CalculateFanOut(child)
+            If child_fan > max_fan_out Then max_fan_out <- child_fan
+        End For
+        Return max_fan_out
+    End Function
+
+    Function CalculateHeightGeneralized(gen_node)
+        If gen_node is null Then Return -1
+        If gen_node.children.IsEmpty() Then Return 0
+        max_child_h <- -1
+        For Each child in gen_node.children Do
+            h <- CalculateHeightGeneralized(child)
+            If h > max_child_h Then max_child_h <- h
+        End For
+        Return 1 + max_child_h
+    End Function
+
+    Function CountNodesGeneralized(gen_node)
+        If gen_node is null Then Return 0
+        count <- 1
+        For Each child in gen_node.children Do
+            count <- count + CountNodesGeneralized(child)
+        End For
+        Return count
+    End Function
+
+    Function CountLeavesGeneralized(gen_node)
+        If gen_node is null Then Return 0
+        If gen_node.children.IsEmpty() Then Return 1
+        leaf_count <- 0
+        For Each child in gen_node.children Do
+            leaf_count <- leaf_count + CountLeavesGeneralized(child)
+        End For
+        Return leaf_count
+    End Function
+
+    Function CalculateBranchingFactor(gen_node)
+        non_leaves_and_children <- GetNonLeavesCount(gen_node)
+        If non_leaves_and_children.non_leaves == 0 Then Return 0.0
+        Return ToReal(non_leaves_and_children.total_children) / non_leaves_and_children.non_leaves
+    End Function
+
+    Function GetNonLeavesCount(gen_node)
+        result.non_leaves <- 0
+        result.total_children <- 0
+        If gen_node is null Then Return result
+        If not gen_node.children.IsEmpty() Then
+            result.non_leaves <- 1
+            result.total_children <- gen_node.children.Size()
+        End If
+        For Each child in gen_node.children Do
+            sub <- GetNonLeavesCount(child)
+            result.non_leaves <- result.non_leaves + sub.non_leaves
+            result.total_children <- result.total_children + sub.total_children
+        End For
+        Return result
+    End Function
+End Class
