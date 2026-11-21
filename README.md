@@ -5,50 +5,49 @@
 - exercice 3 : Charles Rauseo
 
 ### Exercise 1: Binary Tree Representation of Content Categories
-- **Description**: This module implements a binary tree that organizes social media content categories hierarchically (e.g., "Technology" → "Programming" → "Python"). Each category is a `CategoryNode` (`category_id`, `name`, `post_count`, `left`, `right`, `parent`), and children are linked with `AddChild`, which also sets the `parent` reference. The module supports tree metrics (`CalculateHeight`, `CalculateNodeHeight`, `CountNodes`, `CountLeaves`, `IsBalanced`), structural property checks (`IsFullBinaryTree`, `IsPerfectBinaryTree`, `IsCompleteBinaryTree`), and category navigation (`FindCategory`, `FindPathToRoot`, `LowestCommonAncestor`).
+- **Description**: This module implements a binary tree that organizes content categories hierarchically (e.g., "Technology" → "Programming" → "Python"). Each `CategoryNode` stores `category_id`, `name`, `post_count`, `left`, `right` and `parent`. The tree supports metrics, structural property checks and category navigation.
 
 ---
 
-## Complexity Analysis & Questions
+## Complexity Analysis
 
 **Core Algorithms Summary:**
-- **AddChild**: Attaches a child as the left or right subcategory and sets its `parent` pointer ($O(1)$).
-- **CalculateHeight**: Recursively returns `1 + Max(height(left), height(right))`. An empty tree has height $-1$ and a leaf has height $0$ ($O(n)$).
-- **CalculateNodeHeight**: Locates the category with `FindCategory`, then follows the `parent` pointers to count its distance from the root, e.g. "Java" → 2 ($O(n)$ search + $O(h)$ climb).
-- **CountNodes / CountLeaves**: A single recursive traversal that counts every node, or only the nodes with no children ($O(n)$).
-- **IsBalanced**: Top-down recursion that compares `CalculateHeight(left)` and `CalculateHeight(right)` at every node and checks $|h_{left} - h_{right}| \le 1$, then recurses on both subtrees. Heights are recomputed at each level ($O(n \log n)$ on a balanced tree, $O(n^2)$ in the worst case). A bottom-up version that returns the height, or a $-1$ sentinel on imbalance, would bring this down to $O(n)$.
-- **IsFullBinaryTree**: Recursively checks that every node has either 0 or 2 children ($O(n)$).
-- **IsPerfectBinaryTree**: Uses the property that a perfect tree of height $h$ contains exactly $2^{h+1} - 1$ nodes, and compares it with `CountNodes` ($O(n)$, two traversals).
-- **IsCompleteBinaryTree**: Level-order (BFS) traversal with a queue. Once a `null` child is dequeued, a flag is raised, and any non-null node found afterwards means the tree is not complete ($O(n)$ time, $O(w)$ queue space, where $w$ is the maximum width).
-- **FindCategory**: Recursive DFS (root, then left, then right). The tree is not ordered by ID (it is not a BST), so every node may need to be visited ($O(n)$).
-- **FindPathToRoot**: Finds the target node, then climbs the `parent` pointers and collects category names up to the root ($O(n)$ search + $O(h)$ climb).
-- **LowestCommonAncestor**: Single recursive pass. A node is returned if it matches `id1` or `id2`. If both subtrees return a non-null result, the current node is the LCA; otherwise the non-null result is propagated upward ($O(n)$).
+- **AddChild**: Links a child as the left or right subcategory and sets its `parent` pointer ($O(1)$).
+- **CalculateHeight**: Recursively computes `1 + Max(height(left), height(right))`; an empty tree has height $-1$ ($O(n)$).
+- **CalculateNodeHeight**: Finds the category, then climbs the `parent` pointers to get its depth ($O(n)$).
+- **CountNodes / CountLeaves**: A single recursive traversal ($O(n)$).
+- **IsBalanced**: Compares the left and right subtree heights at every node ($O(n \log n)$ when balanced, $O(n^2)$ in the worst case, because heights are recomputed).
+- **IsFullBinaryTree**: Checks that every node has 0 or 2 children ($O(n)$).
+- **IsPerfectBinaryTree**: Checks that $n = 2^{h+1} - 1$ ($O(n)$).
+- **IsCompleteBinaryTree**: BFS that rejects any non-null node found after the first `null` ($O(n)$).
+- **FindCategory**: Recursive DFS by ID; the tree is not a BST ($O(n)$).
+- **FindPathToRoot**: Finds the target, then follows the `parent` pointers up to the root ($O(n)$).
+- **LowestCommonAncestor**: Single recursive pass; the LCA is the node where `id1` and `id2` are found in different subtrees ($O(n)$).
 
 **Complexity:**
 - **Time Complexity:**
-  - **Linking (`AddChild`):** $O(1)$.
-  - **Metrics (`CalculateHeight`, `CountNodes`, `CountLeaves`):** $O(n)$, since each node is visited once.
-  - **Balance check (`IsBalanced`):** $O(n \log n)$ on a balanced tree, $O(n^2)$ in the worst case, because heights are recomputed.
-  - **Property checks (`IsFullBinaryTree`, `IsPerfectBinaryTree`, `IsCompleteBinaryTree`):** $O(n)$.
-  - **Search & navigation (`FindCategory`, `CalculateNodeHeight`, `FindPathToRoot`, `LowestCommonAncestor`):** $O(n)$ in the worst case, because the tree is not ordered by key.
-- **Space Complexity:** $O(n)$ to store the nodes (3 references per node: `left`, `right`, `parent`). The recursion stack uses $O(h)$, which is $O(\log n)$ for a balanced tree and $O(n)$ for a degenerate (list-like) tree. `IsCompleteBinaryTree` additionally uses an $O(w)$ queue.
+  - **AddChild:** $O(1)$.
+  - **Metrics, property checks, search & navigation:** $O(n)$, since each node is visited at most once.
+  - **IsBalanced:** $O(n^2)$ in the worst case.
+- **Space Complexity:** $O(n)$ for the nodes, plus an $O(h)$ recursion stack ($O(\log n)$ if balanced, $O(n)$ if degenerate).
 
-**Questions:**
-1. **Time complexity of calculating tree height (with proof):** $\Theta(n)$. The recurrence is $T(0) = d$ and $T(n) = T(k) + T(n-k-1) + c$, where $k$ is the size of the left subtree. By induction, $T(n) = (c+d)\,n + d$: substituting gives $(c+d)k + d + (c+d)(n-k-1) + d + c = (c+d)n + d$. This holds for any split $k$, so $T(n) = O(n)$. The bound is also tight ($\Omega(n)$), because any unvisited node could be the root of a deeper subtree, so every node must be examined.
-2. **Maximum height of a perfectly balanced binary tree with $n$ nodes:** $h = \lfloor \log_2 n \rfloor$. A perfect tree of height $h$ contains $n = 2^{h+1} - 1$ nodes (the same property used in `IsPerfectBinaryTree`), so $h = \log_2(n+1) - 1$. For the looser AVL-style balance (difference ≤ 1), the height remains logarithmic: $h < 1.44 \log_2 n$.
-3. **Why balance matters with millions of categories:** Navigation operations (`FindPathToRoot`, `CalculateNodeHeight`, breadcrumbs) and the recursion depth of every recursive function cost $O(h)$. With $10^6$ categories, a balanced tree has $h \approx 20$, while a degenerate tree can reach $h \approx 10^6$. That turns logarithmic operations into linear ones and risks stack overflow (Python's default recursion limit is about 1000). Real systems therefore rely on self-balancing structures (AVL, Red-Black trees) or wide N-ary trees / B-trees to keep the height logarithmic.
+### Exercise 2: Tree Traversals for Content Processing
 
----
+- **Description**: This module implements the three traversals from lecture 7 (Process1 = pre-order, Process2 = in-order, Process3 = post-order) and uses them for content processing:
+  - In-order: collect names, running total of posts, k-th category.
+  - Pre-order: indented export, deep copy, serialization with `#` markers for empty subtrees, so the string can be decoded back.
+  - Post-order: total posts, average leaf depth, leaf collection.
+  - Analytics: most popular category, category with the most subcategories, distribution by depth.
+  - Iterative versions with an explicit stack for all three traversals.
 
-### Exercise 2: Tree Traversals for Content Analytics (JavaScript)
-- **Description**: This module (folder `exercise2_tree_traversals/`, Node.js 18+, no dependencies) reuses the `CategoryNode` structure and implements the three depth-first traversals on the subject's category tree, plus traversal-based analytics and iterative versions.
-  - `categoryNode.js`: `CategoryNode` class (`set_left`, `set_right`, `is_leaf`) and `build_sample_tree()`.
-  - `inOrder.js` (Part A): `in_order_collect`, `in_order_accumulate_posts` (running total), `in_order_find_kth` (stops early).
-  - `preOrder.js` (Part B): `pre_order_export` (indented text), `pre_order_copy` (deep copy), `pre_order_serialize_compact` (subject format), `pre_order_serialize` / `pre_order_deserialize` (reversible format with `#` markers).
-  - `postOrder.js` (Part C): `post_order_total_posts`, `post_order_average_depth` (leaf depth), `post_order_collect_leaves`.
-  - `analytics.js`: `find_most_popular_category`, `category_with_most_subcategories` / `categories_with_most_subcategories` (ties), `distribution_by_depth` (level-order with a queue).
-  - `iterativeTraversals.js`: stack-based pre-order, in-order, post-order and total posts.
-  - `main.js`: demo, `test.js`: 15 edge-case tests (`node:test`).
+**Files** (folder `exercise2_tree_traversals/`, JavaScript, Node.js 18+, no dependencies):
+- `categoryNode.js`: `CategoryNode` class (`set_left`, `set_right`, `is_leaf`) and `build_sample_tree()`.
+- `inOrder.js` (Part A): `in_order_collect`, `in_order_accumulate_posts`, `in_order_find_kth`.
+- `preOrder.js` (Part B): `pre_order_export`, `pre_order_copy`, `pre_order_serialize_compact` (subject format), `pre_order_serialize` / `pre_order_deserialize` (reversible, `#` markers).
+- `postOrder.js` (Part C): `post_order_total_posts`, `post_order_average_depth`, `post_order_collect_leaves`.
+- `analytics.js`: `find_most_popular_category`, `category_with_most_subcategories` / `categories_with_most_subcategories` (ties), `distribution_by_depth`.
+- `iterativeTraversals.js`: stack-based pre-order, in-order, post-order and total posts.
+- `main.js`: demo on the subject's tree; `test.js`: 15 edge-case tests (`node:test`).
 
 **Run:**
 ```bash
@@ -56,6 +55,46 @@ node exercise2_tree_traversals/main.js
 node --test exercise2_tree_traversals/test.js   # give the file path: the folder alone is not found by Node 22+
 ```
 
-**Complexity:** every traversal visits each node once: $O(n)$ time. Recursive versions use $O(h)$ call-stack space; `distribution_by_depth` uses an $O(w)$ queue; `in_order_find_kth` stops as soon as the $k$-th node is reached.
+**Complexity:** Every traversal runs in Θ(n) time. The recursive versions need O(h) stack space, and so do the iterative versions, whose explicit stack lives on the heap. `in_order_find_kth` stops early, so it costs O(h + k). Level-order analytics need O(w) queue space.
 
-**Why iterative versions:** the recursion depth equals the tree height. On a degenerate tree of 100,000 levels the recursive `post_order_total_posts` throws `RangeError: Maximum call stack size exceeded`, while the explicit-stack versions (heap-allocated array) succeed — this is checked in `test.js`.
+**Questions:**
+1. **Time and space of each traversal:** Θ(n) time and O(h) space for each. This means O(log n) when the tree is balanced and O(n) when it is skewed.
+2. **Pre-order or post-order for aggregation:** use post-order when the value of a parent depends on its children (subtree totals, heights). Use pre-order when information flows from the parent down to the children (depth, path, inherited labels).
+3. **Iterative versions:** pre-order pops a node and then pushes its right child before its left child. In-order pushes left children until reaching an empty subtree, pops a node, visits it, then moves to its right child. Post-order uses a "last visited" pointer, so a node is processed only after its right subtree.
+4. **Category export:** pre-order is the best choice, because every parent is written before its children. The export can then be read back in one pass.
+
+### Exercise 3: Generalized Trees (N-ary Trees) and Representations
+
+- **Description**: This module implements a generalized (N-ary) tree, where a category can have any number of subcategories. Each `GeneralizedCategoryNode` stores `category_id`, `name`, `post_count`, a `children` list and `parent`. The module covers:
+  - Conversions: binary → generalized (left and right both become children), generalized → binary with the "first child, next sibling" (FCNS) representation, and the inverse FCNS → generalized.
+  - Traversals: pre-order, post-order, level-order (BFS with a queue) and fan-out.
+  - Metrics: height, number of nodes, number of leaves, branching factor.
+
+---
+
+## Complexity Analysis
+
+**Core Algorithms Summary:**
+- **BinaryToGeneralized**: Copies each node and adds its left and right children (if any) to the `children` list, setting `parent` ($O(n)$).
+- **GeneralizedToBinary**: `left` ← first child, then the other children are chained through `right` with a loop; `parent` pointers are set ($O(n)$).
+- **FCNSToGeneralized**: Inverse of the previous one: walks the `left` → `right` → `right`… chain to rebuild each `children` list ($O(n)$).
+- **PreOrderGeneralized / PostOrderGeneralized**: Recursive DFS writing into a single shared result list, so no list is copied ($O(n)$).
+- **LevelOrderGeneralized**: BFS with a queue, enqueuing all children of each dequeued node ($O(n)$).
+- **CalculateFanOut**: Maximum `children.Size()` over all nodes ($O(n)$).
+- **CalculateHeightGeneralized**: `1 + max(height(child))`, a leaf has height 0 and an empty tree $-1$ ($O(n)$).
+- **CountNodesGeneralized / CountLeavesGeneralized**: A single recursive traversal ($O(n)$).
+- **CalculateBranchingFactor**: `GetNonLeavesCount` returns the number of non-leaf nodes and the total number of children in one pass; the result is their real division ($O(n)$).
+
+**Complexity:**
+- **Time Complexity:** $O(n)$ for every function, since each node is visited once and each child reference ($n - 1$ in total) is followed once.
+- **Space Complexity:** $O(n)$ for the nodes, plus an $O(h)$ recursion stack, or $O(w)$ queue space for level-order ($w$ = maximum width).
+
+**Note on the example of the subject:** the subject gives a branching factor of $(3 + 2 + 2 + 3) / 4 = 2.5$, but Python also has 2 children (Django, Flask). With 5 non-leaf nodes the correct value is $12 / 5 = 2.4$, which is what our function returns. Other results on the example tree: fan-out 3, 13 nodes, 8 leaves, height 3.
+
+**Questions:**
+1. **Advantages and disadvantages:** the generalized tree matches the real hierarchy and gives direct access to all subcategories, but each node holds a variable-size list. The FCNS binary tree has a fixed size per node (2 pointers), but reaching the k-th child means walking the sibling chain, and the structure is less intuitive to read.
+2. **Space complexity:** both are $O(n)$. With dynamic lists, the total number of child references is exactly $n - 1$. It becomes $O(n \cdot b)$ only if each node reserves a fixed array of $b$ slots. FCNS uses exactly $2n$ pointers.
+3. **Traversal complexity:** $O(n)$ time in both representations. In the N-ary tree the recursion depth is the real height $h$. In FCNS, going to a sibling is also a recursive step, so the depth can reach $O(n)$ (a root with 1000 children: depth 1 in N-ary, 1000 in FCNS).
+4. **Choice for millions of categories:** the generalized representation for the application logic (direct access to subcategories, stack depth = real height), with iterative traversals to avoid stack overflow and a hash map `id → node` for $O(1)$ lookup. FCNS remains useful for storage, because every record has a fixed size.
+5. **FCNS transformation:** `left` points to the first child and `right` to the next sibling, so the children of a node form a linked list. Each node is created once and each child is read once: $O(n)$ time, $O(n)$ space for the new tree. `FCNSToGeneralized(GeneralizedToBinary(T))` gives back `T`.
+
